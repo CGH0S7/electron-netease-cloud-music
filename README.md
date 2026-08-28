@@ -192,10 +192,19 @@ yarn dev
 # bundle JavaScript and CSS
 yarn dist
 
+# run the bundled app with a system Electron (useful for distro Electron testing)
+# replace electron43 with the executable name installed on your system
+electron43 dist
+
 # package the app
 yarn build linux
 yarn build darwin
 ```
+
+The `build` command creates a self-contained distributable and therefore
+downloads the Electron version declared in `package.json`. To test against a
+distro-provided Electron without that download, use `yarn dist` followed by
+`electron43 dist` (or set `ELECTRON_BIN=electron43 yarn dev` for the dev server).
 
 ## Acknowledgement
 

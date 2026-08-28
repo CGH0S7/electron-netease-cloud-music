@@ -3,6 +3,8 @@ import { Tray, Menu, ipcMain, app } from 'electron';
 
 import debug from 'debug';
 
+import { StatusNotifier } from './status-notifier';
+
 const TAG = 'Tray';
 const d = debug(TAG);
 
@@ -54,17 +56,25 @@ function doDesktopHacks() {
     const xcd = process.env.XDG_CURRENT_DESKTOP;
     const name = app.name;
     const whatever = name.replace('electron', 'whatever');
+    // Electron's Linux tray backend selects its implementation asynchronously.
+    // Keep the KDE AppIndicator hint in place for the lifetime of the tray;
+    // restoring it immediately after the constructor can leave a Wayland tray
+    // object registered with no visible item.
+    const sessionType = (process.env.XDG_SESSION_TYPE || '').toLowerCase();
+    const isWayland = Boolean(process.env.WAYLAND_DISPLAY)
+        || sessionType === 'wayland';
+    d('desktop=%o session=%s wayland=%s', DesktopEnvs, sessionType || 'unknown', isWayland);
     if (isKDE) {
-        // KDE tray icon scale hack
+        // KDE tray backend hint (also needed by Electron 43 on Wayland)
         process.env.XDG_CURRENT_DESKTOP = 'Unity';
-    } else if (isGNOME || isUnity) {
+    } else if ((isGNOME || isUnity) && !isWayland) {
         // GNOME tray icon override by icon theme's Electron icon hack
         app.name = whatever;
     }
     return () => {
-        if (isKDE) {
+        if (isKDE && !isWayland) {
             process.env.XDG_CURRENT_DESKTOP = xcd;
-        } else if (isGNOME || isUnity) {
+        } else if ((isGNOME || isUnity) && !isWayland) {
             app.name = name;
         }
     };
@@ -85,10 +95,31 @@ export class AppTray {
         /** @type {import('electron').WebContents} */
         this.wc = null;
         const restore = doDesktopHacks();
-        this.tray = new Tray(requireIcon(`tray.${color}`));
-        restore();
+        const iconPath = requireIcon(`tray.${color}`);
+        d('creating tray: platform=%s icon=%s', process.platform, iconPath);
+        try {
+            this.tray = new Tray(iconPath);
+        } catch (error) {
+            // Keep the original error context in journal/system logs.  In
+            // particular this makes failures caused by a missing tray backend
+            // distinguishable from an invalid icon path.
+            d('failed to create tray: %o', error);
+            throw error;
+        } finally {
+            restore();
+        }
         this.tray.on('click', () => this.raise() );
         this.tray.setToolTip('Electron NCM');
+        this.statusNotifier = null;
+        if (process.platform === 'linux'
+            && Boolean(process.env.WAYLAND_DISPLAY)
+            && [process.env.XDG_CURRENT_DESKTOP, process.env.XDG_SESSION_DESKTOP]
+                .some(env => (env || '').endsWith('KDE'))) {
+            this.statusNotifier = new StatusNotifier(
+                iconPath,
+                (x, y) => this.popupContextMenu(x, y)
+            );
+        }
         /**
          * @type {import('electron').MenuItemConstructorOptions[]}
          */
@@ -185,13 +216,21 @@ export class AppTray {
      */
     setColor(color) {
         if (color === 'light' || color === 'dark') {
-            this.tray.setImage(requireIcon(`tray.${color}`));
+            const iconPath = requireIcon(`tray.${color}`);
+            this.tray.setImage(iconPath);
+            if (this.statusNotifier) this.statusNotifier.setIcon(iconPath);
         }
     }
 
     raise() {
+        if (!this.win || this.win.isDestroyed()) return;
+        if (this.win.isMinimized()) this.win.restore();
         this.win.show();
-        this.win.focus();
+        app.focus({ steal: true });
+        this.win.setAlwaysOnTop(true);
+        this.win.focus({ steal: true });
+        this.win.moveTop();
+        this.win.setAlwaysOnTop(false);
     }
 
     quit() {
@@ -214,7 +253,14 @@ export class AppTray {
     updateMenu() {
         const tmpl = this.likeMenu.concat(this.controlMenu, this.muteMenu, this.trackMenu, this.exitMenu);
         const menu = Menu.buildFromTemplate(tmpl);
+        this.contextMenu = menu;
         this.tray.setContextMenu(menu);
+        if (this.statusNotifier) this.statusNotifier.setMenu(tmpl);
+    }
+
+    popupContextMenu(x, y) {
+        if (!this.contextMenu || !this.win || this.win.isDestroyed()) return;
+        this.contextMenu.popup({ window: this.win, x, y });
     }
 
     /**
@@ -229,6 +275,10 @@ export class AppTray {
     destroy() {
         this.tray.destroy();
         this.tray = null;
+        if (this.statusNotifier) {
+            this.statusNotifier.destroy();
+            this.statusNotifier = null;
+        }
         ipcMain.removeListener(TAG, this.ipcListener);
     }
 }

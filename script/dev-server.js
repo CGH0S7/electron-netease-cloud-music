@@ -19,8 +19,11 @@ process.on('SIGINT', () => {
     process.exit(0);
 });
 
+// Set ELECTRON_BIN to test against a distro-provided Electron (for example
+// `ELECTRON_BIN=electron43 yarn dev`) without downloading the npm runtime.
+const electronBin = process.env.ELECTRON_BIN || 'electron';
 const electron = exec([
-    'electron',
+    electronBin,
     '--ozone-platform-hint=auto',
     '--enable-wayland-ime',
     absPath('/src/main/index.dev.js'),
