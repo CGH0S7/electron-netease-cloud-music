@@ -1,9 +1,13 @@
 <template>
     <ListDetailLayout class="fav-playlist"
-        :listLoading="user.playlist.length <= 0"
+        :listLoading="user.playlist.length <= 0 && user.loginValid"
         :detailLoading="detailLoading"
         tipText="登录后查看收藏的歌单"
-        :showTip="!user.loginValid">
+        :showTip="!user.loginValid"
+        :isEmpty="user.loginValid && user.playlist.length === 0"
+        emptyIcon="queue_music"
+        emptyText="暂无歌单"
+        emptySubtext="目前为空，先去创建或收藏歌单再来访问吧">
         <template #list>
             <mu-list toggle-nested
                 :nested-indent="false">

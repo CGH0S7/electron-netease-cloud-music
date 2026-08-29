@@ -90,7 +90,11 @@ export default {
 .searchbox {
     height: unset !important;
     .search-btn {
+        color: var(--on-primary-color, #ffffff) !important;
         transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1);
+        .mu-icon {
+            color: var(--on-primary-color, #ffffff) !important;
+        }
         &:hover {
             transform: scale(1.08);
         }

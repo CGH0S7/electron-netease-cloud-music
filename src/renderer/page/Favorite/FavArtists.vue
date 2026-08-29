@@ -3,7 +3,11 @@
         :listLoading="listLoading"
         :detailLoading="detailLoading"
         tipText="登录后查看收藏的歌手"
-        :showTip="!user.loginValid">
+        :showTip="!user.loginValid"
+        :isEmpty="user.loginValid && !listLoading && user.artists.length === 0"
+        emptyIcon="person_outline"
+        emptyText="暂无收藏的歌手"
+        emptySubtext="目前为空，先去添加喜欢的歌手再来访问吧">
         <template #list>
             <mu-list>
                 <AvatarListItem v-for="ar in user.artists"

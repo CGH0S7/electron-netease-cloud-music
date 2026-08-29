@@ -3,7 +3,11 @@
         :listLoading="listLoading"
         :detailLoading="detailLoading"
         tipText="登录后查看订阅的主播电台"
-        :showTip="!user.loginValid">
+        :showTip="!user.loginValid"
+        :isEmpty="user.loginValid && !listLoading && user.djradios.length === 0"
+        emptyIcon="radio"
+        emptyText="暂无订阅的主播电台"
+        emptySubtext="目前为空，先去订阅喜欢的电台再来访问吧">
         <template #list>
             <mu-list>
                 <AvatarListItem v-for="r in user.djradios"

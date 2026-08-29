@@ -514,7 +514,7 @@ export default {
 .player-bar {
     background-color: var(--md-sys-color-surface-container-high, var(--background-color));
     box-shadow: var(--md-elevation-3);
-    border-top: 1px solid var(--md-sys-color-outline-variant, rgba(0, 0, 0, 0.08));
+    border-top: none;
     backdrop-filter: blur(24px);
     display: flex;
     align-items: center;

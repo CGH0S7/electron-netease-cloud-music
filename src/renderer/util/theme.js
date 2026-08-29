@@ -14,6 +14,23 @@ function hexToRgb(hex) {
     return `${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}`;
 }
 
+export function getLuminance(hex) {
+    if (!hex) return 0.2;
+    let c = hex.replace('#', '');
+    if (c.length === 3) {
+        c = c.split('').map(x => x + x).join('');
+    }
+    const num = parseInt(c, 16);
+    if (isNaN(num)) return 0.2;
+    const r = ((num >> 16) & 255) / 255;
+    const g = ((num >> 8) & 255) / 255;
+    const b = (num & 255) / 255;
+    const a = [r, g, b].map(v => {
+        return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    });
+    return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+}
+
 /**
  * add app specific theme variable, then set theme color
  * @param {any} theme theme option
@@ -24,6 +41,11 @@ export function initTheme(theme, extendName) {
         const isDark = theme.type === 'dark';
         const primaryRgb = hexToRgb(theme.primary);
         const secondaryRgb = hexToRgb(theme.secondary);
+        const isPrimaryLight = getLuminance(theme.primary) > 0.45;
+        const onPrimary = isPrimaryLight ? 'rgba(0, 0, 0, 0.88)' : '#ffffff';
+        const onPrimarySecondary = isPrimaryLight ? 'rgba(0, 0, 0, 0.60)' : 'rgba(255, 255, 255, 0.75)';
+        const onPrimarySurface = isPrimaryLight ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.15)';
+        const onPrimarySurfaceHover = isPrimaryLight ? 'rgba(0, 0, 0, 0.14)' : 'rgba(255, 255, 255, 0.25)';
 
         return `body {
 --primary-color: ${theme.primary};
@@ -37,8 +59,15 @@ export function initTheme(theme, extendName) {
 --background-color: ${theme.background.default};
 --paper-color: ${theme.background.paper};
 
+/* Adaptive Top Bar Foreground Tokens */
+--on-primary-color: ${onPrimary};
+--on-primary-secondary: ${onPrimarySecondary};
+--on-primary-surface: ${onPrimarySurface};
+--on-primary-surface-hover: ${onPrimarySurfaceHover};
+
 /* Material 3 Expressive Design Tokens */
 --md-sys-color-primary: ${theme.primary};
+--md-sys-color-on-primary: ${onPrimary};
 --md-sys-color-primary-container: rgba(${primaryRgb}, ${isDark ? 0.28 : 0.12});
 --md-sys-color-on-primary-container: ${isDark ? '#ffdad6' : '#410002'};
 --md-sys-color-secondary: ${theme.secondary};

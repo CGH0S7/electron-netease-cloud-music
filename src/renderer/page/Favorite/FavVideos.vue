@@ -3,7 +3,11 @@
         :listLoading="listLoading"
         :detailLoading="detailLoading"
         tipText="登录后查看收藏的视频"
-        :showTip="!user.loginValid">
+        :showTip="!user.loginValid"
+        :isEmpty="user.loginValid && !listLoading && user.videos.length === 0"
+        emptyIcon="videocam"
+        emptyText="暂无收藏的视频"
+        emptySubtext="目前为空，先去添加喜欢的视频再来访问吧">
         <template #list>
             <mu-list>
                 <AvatarListItem v-for="v in user.videos"

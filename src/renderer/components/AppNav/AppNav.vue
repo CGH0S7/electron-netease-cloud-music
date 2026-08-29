@@ -6,21 +6,21 @@
                 id="appbar-window-control">
                 <mu-button icon
                     small
-                    color="white"
+                    class="window-ctrl-btn"
                     @click="handleClose()">
                     <mu-icon value="close"
                         :size="16"></mu-icon>
                 </mu-button>
                 <mu-button icon
                     small
-                    color="white"
+                    class="window-ctrl-btn"
                     @click="handleMaximize()">
                     <mu-icon value="keyboard_arrow_up"
                         :size="16"></mu-icon>
                 </mu-button>
                 <mu-button icon
                     small
-                    color="white"
+                    class="window-ctrl-btn"
                     @click="handleMinimize()">
                     <mu-icon value="keyboard_arrow_down"
                         :size="16"></mu-icon>
@@ -277,10 +277,14 @@ export default {
         position: fixed;
         top: 0;
         left: 0;
-        button {
+        .window-ctrl-btn, button {
             cursor: default !important;
             width: 28px;
             height: 28px;
+            color: var(--on-primary-color, #ffffff) !important;
+            .mu-icon {
+                color: var(--on-primary-color, #ffffff) !important;
+            }
         }
     }
     #appbar-drag-region {
@@ -300,13 +304,23 @@ export default {
         left: 0;
         box-shadow: var(--md-elevation-1);
         backdrop-filter: blur(16px);
-        transition: background-color 0.3s cubic-bezier(0.2, 0, 0, 1);
+        transition: background-color 0.3s cubic-bezier(0.2, 0, 0, 1), color 0.3s cubic-bezier(0.2, 0, 0, 1);
+        color: var(--on-primary-color, #ffffff) !important;
 
         .mu-appbar-title {
             line-height: unset;
             font-size: 18px;
             font-weight: 600;
             letter-spacing: 0.2px;
+            color: var(--on-primary-color, #ffffff) !important;
+        }
+
+        .mu-icon {
+            color: var(--on-primary-color, #ffffff) !important;
+        }
+
+        .nav-btn {
+            color: var(--on-primary-color, #ffffff) !important;
         }
     }
 
@@ -319,16 +333,18 @@ export default {
         .nav-history-buttons {
             display: flex;
             align-items: center;
-            background: rgba(255, 255, 255, 0.15);
+            background: var(--on-primary-surface, rgba(255, 255, 255, 0.15));
             border-radius: var(--md-shape-full, 9999px);
             padding: 2px 4px;
             margin-left: 4px;
+            transition: background-color 0.3s cubic-bezier(0.2, 0, 0, 1);
 
             .nav-history-btn {
                 width: 32px;
                 height: 32px;
                 min-width: 32px;
                 opacity: 0.95;
+                color: var(--on-primary-color, #ffffff) !important;
                 transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
 
                 &:disabled {
@@ -336,7 +352,7 @@ export default {
                 }
 
                 &:not(:disabled):hover {
-                    background: rgba(255, 255, 255, 0.25);
+                    background: var(--on-primary-surface-hover, rgba(255, 255, 255, 0.25));
                     transform: scale(1.08);
                 }
 

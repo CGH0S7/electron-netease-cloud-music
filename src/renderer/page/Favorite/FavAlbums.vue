@@ -3,7 +3,11 @@
         :listLoading="listLoading"
         :detailLoading="detailLoading"
         tipText="登录后查看收藏的专辑"
-        :showTip="!user.loginValid">
+        :showTip="!user.loginValid"
+        :isEmpty="user.loginValid && !listLoading && user.albums.length === 0"
+        emptyIcon="album"
+        emptyText="暂无收藏的专辑"
+        emptySubtext="目前为空，先去收藏喜欢的专辑再来访问吧">
         <template #list>
             <mu-list>
                 <AvatarListItem v-for="al in user.albums"

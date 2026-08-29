@@ -57,21 +57,6 @@ export const Entries = [
                 title: '还原默认抽屉背景',
                 handler: 'promptResetDrawerBkg',
                 depends: ['customDrawerBkg']
-            },
-            {
-                type: 'toggle',
-                title: '播放器波浪动态进度条',
-                prop: 'wavyProgressBar'
-            },
-            {
-                type: 'toggle',
-                title: '播放底栏液态玻璃特效背景',
-                prop: 'playerBarGlassEffect'
-            },
-            {
-                type: 'toggle',
-                title: '歌曲列表显示迷你专辑封面',
-                prop: 'showTrackMiniCover'
             }
         ]
     },
@@ -193,6 +178,21 @@ export const Entries = [
     {
         name: '特性',
         items: [
+            {
+                type: 'toggle',
+                title: '播放器波浪动态进度条',
+                prop: 'wavyProgressBar'
+            },
+            {
+                type: 'toggle',
+                title: '播放底栏液态玻璃特效背景',
+                prop: 'playerBarGlassEffect'
+            },
+            {
+                type: 'toggle',
+                title: '歌曲列表显示迷你专辑封面',
+                prop: 'showTrackMiniCover'
+            },
             {
                 type: 'toggle',
                 title: '自动签到',
