@@ -21,7 +21,7 @@ import { mapActions } from 'vuex';
 
 import Api from '@/api/ipc';
 import { encm } from '@/util/globals';
-import { setTheme } from '@/util/theme';
+import { applyThemeFromSettings } from '@/util/theme';
 import { humanSize } from '@/util/formatter';
 import { UPDATE_SETTINGS } from '@/store/mutation-types';
 import { isLinux, isDarwin, browserWindow, webContents } from '@/util/globals';
@@ -59,7 +59,10 @@ export default {
         settings() { return this.$store.state.settings; },
         /** @returns {{ [key: string]: Vue }} */
         Option() { return Option; },
-        Entries() { return Entries; }
+        Entries() { return Entries; },
+        drawerBkgStatus() {
+            return this.settings.customDrawerBkg ? '已自定义' : '默认';
+        }
     },
     methods: {
         ...mapActions([
@@ -67,6 +70,62 @@ export default {
             'resetSettings',
             'updateMainWindowTitle'
         ]),
+        uploadDrawerBkg() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = async (e) => {
+                const file = e.target.files && e.target.files[0];
+                if (!file) return;
+                try {
+                    const objectUrl = URL.createObjectURL(file);
+                    const img = new Image();
+                    await new Promise((resolve, reject) => {
+                        img.onload = () => resolve();
+                        img.onerror = () => reject(new Error('Image decode error'));
+                        img.src = objectUrl;
+                    });
+                    const canvas = document.createElement('canvas');
+                    const maxWidth = 800;
+                    const maxHeight = 600;
+                    let w = img.width || 600;
+                    let h = img.height || 400;
+                    if (w > maxWidth || h > maxHeight) {
+                        const ratio = Math.min(maxWidth / w, maxHeight / h);
+                        w = Math.round(w * ratio);
+                        h = Math.round(h * ratio);
+                    }
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    URL.revokeObjectURL(objectUrl);
+                    const optimizedDataUrl = canvas.toDataURL('image/jpeg', 0.88);
+                    await this.setByName('customDrawerBkg', optimizedDataUrl);
+                    this.$toast.message('抽屉背景图片已更新');
+                } catch {
+                    try {
+                        const reader = new FileReader();
+                        reader.onload = async (ev) => {
+                            await this.setByName('customDrawerBkg', ev.target.result);
+                            this.$toast.message('抽屉背景图片已更新');
+                        };
+                        reader.readAsDataURL(file);
+                    } catch {
+                        this.$toast.message('图片加载失败，请重试');
+                    }
+                }
+            };
+            input.click();
+        },
+        promptResetDrawerBkg() {
+            this.$confirm('确定要恢复抽屉默认背景图片吗？', '提示').then(({ result }) => {
+                if (result) {
+                    this.setByName('customDrawerBkg', '');
+                    this.$toast.message('已恢复默认背景图片');
+                }
+            }).catch(() => { /* noop */ });
+        },
         shouldShowOption(item) {
             if (!item.depends && !item.exclude) return true;
             if (Array.isArray(item.depends)) {
@@ -171,16 +230,11 @@ export default {
                 if (type !== UPDATE_SETTINGS) return;
                 for (const [key, val] of Object.entries(payload)) {
                     switch (key) {
+                        case 'themeFollowCover':
                         case 'themePrimaryColor':
                         case 'themeSecondaryColor':
                         case 'themeVariety': {
-                            const variety = state.settings.themeVariety === 'auto'
-                                ? (this.darkMediaQuery.matches ? 'dark' : 'light')
-                                : state.settings.themeVariety;
-                            setTheme({
-                                primary: state.settings.themePrimaryColor,
-                                secondary: state.settings.themeSecondaryColor
-                            }, variety);
+                            applyThemeFromSettings(state.settings, state.ui, this.darkMediaQuery);
                             break;
                         }
                         case 'windowBorder':

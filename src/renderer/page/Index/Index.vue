@@ -191,30 +191,45 @@ export default {
 <style lang="less">
 .wrapper {
     user-select: none;
-    max-width: 800px;
+    max-width: 860px;
     margin: auto;
+    padding: 16px 20px 80px;
+
     .actions {
-        margin: 36px 0;
+        margin: 28px 0 32px;
         display: flex;
         align-items: center;
         justify-content: space-evenly;
     }
+
     .card {
         margin: 24px 0;
+        border-radius: var(--md-shape-xl, 20px) !important;
+        background-color: var(--md-sys-color-surface-container-low, var(--background-color)) !important;
+        border: 1px solid var(--md-sys-color-outline-variant, rgba(0, 0, 0, 0.08));
+        box-shadow: var(--md-elevation-1) !important;
+        padding: 16px 8px 20px;
+
         .heading {
-            font-size: 24px;
-            font-weight: bold;
-            padding: 12px;
-            opacity: 0.62;
+            font-size: 20px;
+            font-weight: 700;
+            padding: 4px 16px 14px;
+            color: var(--text-color);
+            letter-spacing: -0.2px;
         }
+
         .scroller {
             display: flex;
-            overflow: auto;
-            min-height: 218px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            min-height: 230px;
+            padding-bottom: 6px;
+            scroll-behavior: smooth;
+
             &::after {
                 content: ' ';
                 flex-shrink: 0;
-                flex-basis: 12px;
+                flex-basis: 14px;
             }
         }
     }

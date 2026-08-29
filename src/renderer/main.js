@@ -10,8 +10,9 @@ import App from './App.vue';
 import store from './store/index';
 import { UPDATE_SETTINGS } from './store/mutation-types';
 import routes from './routes';
+import { setupNavigation } from './util/navigation';
 import { encm, isLinux } from './util/globals';
-import { initTheme, setTheme } from './util/theme';
+import { initTheme, applyThemeFromSettings } from './util/theme';
 import DblclickRipple from './util/dblclick-ripple';
 import * as tray from './util/tray';
 import * as mpris from './util/mpris';
@@ -39,13 +40,15 @@ const darkMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
 try {
     let settings;
-    const previousSettings = settings = sessionStorage.getItem('settings');
+    const previousSettings = sessionStorage.getItem('settings');
     if (previousSettings) {
-        settings = JSON.parse(previousSettings);
+        settings = Object.assign({}, encm.initialSettings, JSON.parse(previousSettings));
     } else {
         settings = encm.initialSettings;
-        sessionStorage.setItem('settings', JSON.stringify(settings));
     }
+    try {
+        sessionStorage.setItem('settings', JSON.stringify(settings));
+    } catch { /* ignore */ }
     store.commit(UPDATE_SETTINGS, settings);
     const themeVariety = settings.themeVariety === 'auto'
         ? (darkMediaQuery.matches ? 'dark' : 'light')
@@ -79,7 +82,11 @@ store.dispatch('restoreUiState').then(() => {
         store.dispatch('restoreRadio'),
         store.dispatch('restorePlaylist')
     ]).then(() => {
-        store.dispatch('updateUiTrack');
+        store.dispatch('updateUiTrack').then(() => {
+            if (store.state.settings.themeFollowCover) {
+                applyThemeFromSettings(store.state.settings, store.state.ui, darkMediaQuery);
+            }
+        });
         if (store.state.settings.autoPlay) {
             store.dispatch('playAudio');
         }
@@ -94,6 +101,7 @@ window.onbeforeunload = () => {
 };
 
 const router = new Router({ routes });
+setupNavigation(router);
 if (store.state.settings.startupPage !== 'index') {
     router.replace({ name: store.state.settings.startupPage });
 }
@@ -109,13 +117,14 @@ const app = new Vue({
     render: h => h(App) 
 });
 
-darkMediaQuery.addEventListener('change', e => {
-    if (store.state.settings.themeVariety !== 'auto') return;
-    const variety = e.matches ? 'dark' : 'light';
-    setTheme({
-        primary: store.state.settings.themePrimaryColor,
-        secondary: store.state.settings.themeSecondaryColor
-    }, variety);
+store.subscribe((mutation, state) => {
+    if (mutation.type === 'SET_COVER_IMG_SRC' && state.settings.themeFollowCover) {
+        applyThemeFromSettings(state.settings, state.ui, darkMediaQuery);
+    }
+});
+
+darkMediaQuery.addEventListener('change', () => {
+    applyThemeFromSettings(store.state.settings, store.state.ui, darkMediaQuery);
 });
 
 if (isLinux) {

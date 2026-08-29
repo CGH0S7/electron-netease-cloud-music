@@ -1,8 +1,18 @@
 import MuseUI from 'muse-ui';
 
 const overrides = {
-    divider: 'rgba(0,0,0,.1)'
+    divider: 'rgba(0,0,0,.08)'
 };
+
+function hexToRgb(hex) {
+    if (!hex) return '229, 57, 53';
+    let c = hex.replace('#', '');
+    if (c.length === 3) {
+        c = c.split('').map(x => x + x).join('');
+    }
+    const num = parseInt(c, 16);
+    return `${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}`;
+}
 
 /**
  * add app specific theme variable, then set theme color
@@ -11,14 +21,65 @@ const overrides = {
  */
 export function initTheme(theme, extendName) {
     MuseUI.theme.addCreateTheme((theme) => {
-        return `body{
---primary-color:${theme.primary};
---accent-color:${theme.secondary};
---text-color:${theme.text.primary};
---secondary-text-color:${theme.text.secondary};
---hint-text-color:${theme.text.hint};
---disabled-text-color:${theme.text.disabled};
---background-color:${theme.background.default};
+        const isDark = theme.type === 'dark';
+        const primaryRgb = hexToRgb(theme.primary);
+        const secondaryRgb = hexToRgb(theme.secondary);
+
+        return `body {
+--primary-color: ${theme.primary};
+--primary-rgb: ${primaryRgb};
+--accent-color: ${theme.secondary};
+--secondary-rgb: ${secondaryRgb};
+--text-color: ${theme.text.primary};
+--secondary-text-color: ${theme.text.secondary};
+--hint-text-color: ${theme.text.hint};
+--disabled-text-color: ${theme.text.disabled};
+--background-color: ${theme.background.default};
+--paper-color: ${theme.background.paper};
+
+/* Material 3 Expressive Design Tokens */
+--md-sys-color-primary: ${theme.primary};
+--md-sys-color-primary-container: rgba(${primaryRgb}, ${isDark ? 0.28 : 0.12});
+--md-sys-color-on-primary-container: ${isDark ? '#ffdad6' : '#410002'};
+--md-sys-color-secondary: ${theme.secondary};
+--md-sys-color-secondary-container: rgba(${secondaryRgb}, ${isDark ? 0.28 : 0.12});
+
+--md-sys-color-surface: ${isDark ? '#141218' : '#fffbfe'};
+--md-sys-color-surface-dim: ${isDark ? '#141218' : '#ded8e1'};
+--md-sys-color-surface-bright: ${isDark ? '#3b383e' : '#fef7ff'};
+--md-sys-color-surface-container-lowest: ${isDark ? '#0f0d13' : '#ffffff'};
+--md-sys-color-surface-container-low: ${isDark ? '#1d1b20' : '#f7f2fa'};
+--md-sys-color-surface-container: ${isDark ? '#211f26' : '#f3edf7'};
+--md-sys-color-surface-container-high: ${isDark ? '#2b2930' : '#ece6f0'};
+--md-sys-color-surface-container-highest: ${isDark ? '#36343b' : '#e6e0e9'};
+
+--md-sys-color-outline: ${isDark ? '#938f99' : '#79747e'};
+--md-sys-color-outline-variant: ${isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.10)'};
+--md-sys-color-inverse-surface: ${isDark ? '#e6e0e9' : '#313033'};
+--md-sys-color-inverse-on-surface: ${isDark ? '#313033' : '#f4eff4'};
+
+/* Glassmorphism Tokens */
+--md-glass-bg: ${isDark ? 'rgba(25, 23, 32, 0.70)' : 'rgba(255, 255, 255, 0.70)'};
+--md-glass-border: ${isDark ? 'rgba(255, 255, 255, 0.16)' : 'rgba(255, 255, 255, 0.45)'};
+--md-glass-highlight: ${isDark ? 'rgba(255, 255, 255, 0.45)' : 'rgba(255, 255, 255, 0.85)'};
+
+/* Shapes */
+--md-shape-xs: 4px;
+--md-shape-s: 8px;
+--md-shape-m: 12px;
+--md-shape-l: 16px;
+--md-shape-xl: 20px;
+--md-shape-xxl: 28px;
+--md-shape-full: 9999px;
+
+/* Elevation Shadows */
+--md-elevation-1: 0 1px 3px 0 rgba(0, 0, 0, ${isDark ? 0.35 : 0.12}), 0 1px 2px -1px rgba(0, 0, 0, ${isDark ? 0.3 : 0.08});
+--md-elevation-2: 0 4px 12px 0 rgba(0, 0, 0, ${isDark ? 0.45 : 0.08}), 0 2px 4px -1px rgba(0, 0, 0, ${isDark ? 0.3 : 0.06});
+--md-elevation-3: 0 8px 24px 0 rgba(0, 0, 0, ${isDark ? 0.55 : 0.12}), 0 3px 8px -2px rgba(0, 0, 0, ${isDark ? 0.4 : 0.08});
+
+/* Motion */
+--md-motion-standard: cubic-bezier(0.2, 0, 0, 1);
+--md-motion-expressive: cubic-bezier(0.34, 1.56, 0.64, 1);
 }`;
     });
     setTheme(theme, extendName);
@@ -32,4 +93,129 @@ export function initTheme(theme, extendName) {
 export function setTheme(theme, extendName) {
     const id = 'ncm';
     MuseUI.theme.add(id, { ...overrides, ...theme }, extendName).use(id);
+}
+
+/**
+ * Extract vibrant primary and secondary colors and brightness from an image URL
+ * @param {string} src
+ * @returns {Promise<{ primary: string, secondary: string, isDark: boolean }>}
+ */
+export async function extractColorsFromImage(src) {
+    if (!src) return null;
+    try {
+        const response = await fetch(src);
+        const blob = await response.blob();
+        const bitmap = await createImageBitmap(blob);
+        const canvas = document.createElement('canvas');
+        const size = 64;
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        ctx.drawImage(bitmap, 0, 0, size, size);
+        const imageData = ctx.getImageData(0, 0, size, size).data;
+
+        const colorCounts = new Map();
+        let totalBrightness = 0;
+        let pixelCount = 0;
+
+        for (let i = 0; i < imageData.length; i += 4) {
+            const r = imageData[i];
+            const g = imageData[i + 1];
+            const b = imageData[i + 2];
+            const a = imageData[i + 3];
+
+            if (a < 128) continue;
+
+            const max = Math.max(r, g, b);
+            const min = Math.min(r, g, b);
+            const l = (max + min) / 510;
+            const brightness = 0.299 * r + 0.587 * g + 0.114 * b;
+            totalBrightness += brightness;
+            pixelCount++;
+
+            const d = (max - min) / 255;
+            const s = l > 0.5 ? d / (2 - max / 255 - min / 255) : d / (max / 255 + min / 255);
+
+            if (l > 0.1 && l < 0.9 && s > 0.15) {
+                const qr = Math.round(r / 16) * 16;
+                const qg = Math.round(g / 16) * 16;
+                const qb = Math.round(b / 16) * 16;
+                const key = `${qr},${qg},${qb}`;
+                const weight = (1 + s * 2) * (1 - Math.abs(l - 0.5));
+                colorCounts.set(key, (colorCounts.get(key) || 0) + weight);
+            }
+        }
+
+        const avgBrightness = pixelCount > 0 ? totalBrightness / pixelCount : 128;
+        const isDark = avgBrightness < 120;
+
+        const sortedColors = Array.from(colorCounts.entries()).sort((a, b) => b[1] - a[1]);
+
+        let primaryRgb = [229, 57, 53];
+        let secondaryRgb = [255, 82, 82];
+
+        if (sortedColors.length > 0) {
+            const [pr, pg, pb] = sortedColors[0][0].split(',').map(Number);
+            primaryRgb = [pr, pg, pb];
+
+            let foundSecondary = false;
+            for (let i = 1; i < sortedColors.length; i++) {
+                const [sr, sg, sb] = sortedColors[i][0].split(',').map(Number);
+                const dist = Math.sqrt((pr - sr) ** 2 + (pg - sg) ** 2 + (pb - sb) ** 2);
+                if (dist > 60) {
+                    secondaryRgb = [sr, sg, sb];
+                    foundSecondary = true;
+                    break;
+                }
+            }
+            if (!foundSecondary) {
+                secondaryRgb = [
+                    Math.min(255, Math.max(0, primaryRgb[0] + 30)),
+                    Math.min(255, Math.max(0, primaryRgb[1] + 30)),
+                    Math.min(255, Math.max(0, primaryRgb[2] + 40))
+                ];
+            }
+        }
+
+        const toHex = rgb => '#' + rgb.map(x => Math.min(255, Math.max(0, Math.round(x))).toString(16).padStart(2, '0')).join('');
+
+        return {
+            primary: toHex(primaryRgb),
+            secondary: toHex(secondaryRgb),
+            isDark
+        };
+    } catch (e) {
+        console.error('Failed to extract dynamic colors:', e); // eslint-disable-line no-console
+        return null;
+    }
+}
+
+/**
+ * Apply theme based on current settings and cover image
+ * @param {import('@/store/modules/settings').State} settings
+ * @param {import('@/store/modules/ui').State} ui
+ * @param {MediaQueryList} darkMediaQuery
+ */
+export async function applyThemeFromSettings(settings, ui, darkMediaQuery) {
+    if (settings.themeFollowCover && ui && ui.coverImgSrc) {
+        const extracted = await extractColorsFromImage(ui.coverImgSrc);
+        if (extracted) {
+            const variety = settings.themeVariety === 'auto'
+                ? (extracted.isDark ? 'dark' : 'light')
+                : settings.themeVariety;
+            setTheme({
+                primary: extracted.primary,
+                secondary: extracted.secondary
+            }, variety);
+            return;
+        }
+    }
+
+    const variety = settings.themeVariety === 'auto'
+        ? (darkMediaQuery && darkMediaQuery.matches ? 'dark' : 'light')
+        : settings.themeVariety;
+    setTheme({
+        primary: settings.themePrimaryColor,
+        secondary: settings.themeSecondaryColor
+    }, variety);
 }

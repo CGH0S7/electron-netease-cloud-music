@@ -25,7 +25,9 @@ import defaultCoverImg from 'assets/img/cloud_default.webp';
  */
 export async function updateSettings({ commit, state }, payload) {
     commit(types.UPDATE_SETTINGS, payload);
-    sessionStorage.setItem('settings', JSON.stringify(state.settings));
+    try {
+        sessionStorage.setItem('settings', JSON.stringify(state.settings));
+    } catch { /* ignore sessionStorage quota error */ }
     await Api.writeSettings(state.settings);
 }
 

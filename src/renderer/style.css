@@ -1,26 +1,43 @@
-/* scroll bar */
+/* Material 3 Expressive Global Styles */
 
+/* Modern Pill Scrollbar */
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-    background-color: darkgrey;
+    background-color: rgba(120, 120, 128, 0.28);
+    border-radius: 9999px;
+    transition: background-color 0.2s cubic-bezier(0.2, 0, 0, 1);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background-color: grey;
+    background-color: rgba(120, 120, 128, 0.5);
 }
 
-/* global font, etc */
-
+/* Global Font & Smooth Antialiasing */
 body {
     overflow: hidden;
-    font-family: Roboto, 'Noto Sans', 'Segoe UI', 'Noto Sans CJK SC',
-        'Source Han Sans CN', 'WenQuanYi Micro Hei', 'WenQuanYi Zen Hei',
-        'Droid Sans Fallback', 'PingFang SC', 'Microsoft Yahei', sans-serif;
-    background-color: unset;
+    font-family: 'Google Sans', 'Google Sans Text', Roboto, 'Segoe UI',
+        'PingFang SC', 'Hiragino Sans GB', 'Microsoft Yahei', 'Source Han Sans CN',
+        'Noto Sans CJK SC', 'WenQuanYi Micro Hei', sans-serif;
+    background-color: var(--background-color, #ffffff);
+    color: var(--text-color, #1f1f1f);
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+::selection {
+    background: var(--md-sys-color-primary-container, rgba(229, 57, 53, 0.2));
+    color: var(--primary-color, #e53935);
 }
 
 .mono-font {
@@ -30,8 +47,7 @@ body {
         'PingFang SC', 'Microsoft Yahei', sans-serif;
 }
 
-/* material icons */
-
+/* Material Icons */
 @font-face {
     font-family: 'Material Icons';
     font-style: normal;
@@ -55,4 +71,74 @@ body {
     -webkit-font-feature-settings: 'liga';
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+}
+
+/* Material 3 Expressive Component Overrides */
+
+/* Cards */
+.mu-card {
+    border-radius: var(--md-shape-xl, 20px) !important;
+    background-color: var(--md-sys-color-surface-container-low, var(--background-color)) !important;
+    border: 1px solid var(--md-sys-color-outline-variant, rgba(0, 0, 0, 0.08));
+    box-shadow: var(--md-elevation-1) !important;
+    transition: all 0.25s var(--md-motion-standard, cubic-bezier(0.2, 0, 0, 1)) !important;
+}
+
+/* Dialogs & Modals */
+.mu-dialog {
+    border-radius: var(--md-shape-xxl, 28px) !important;
+    box-shadow: var(--md-elevation-3) !important;
+    border: 1px solid var(--md-sys-color-outline-variant, rgba(255, 255, 255, 0.1)) !important;
+    background-color: var(--md-sys-color-surface-container-high, var(--background-color)) !important;
+}
+
+.mu-dialog-title {
+    font-weight: 600 !important;
+    font-size: 20px !important;
+    padding: 24px 24px 16px !important;
+}
+
+.mu-dialog-body {
+    padding: 0 24px 24px !important;
+}
+
+.mu-dialog-actions {
+    padding: 12px 24px 20px !important;
+}
+
+/* Popover & Menus */
+.mu-popover {
+    border-radius: var(--md-shape-l, 16px) !important;
+    box-shadow: var(--md-elevation-2) !important;
+    border: 1px solid var(--md-sys-color-outline-variant, rgba(0, 0, 0, 0.08)) !important;
+    background-color: var(--md-sys-color-surface-container, var(--background-color)) !important;
+    overflow: hidden;
+}
+
+/* Buttons */
+.mu-button {
+    border-radius: var(--md-shape-full, 9999px) !important;
+    font-weight: 500 !important;
+    transition: all 0.2s var(--md-motion-standard, cubic-bezier(0.2, 0, 0, 1)) !important;
+}
+
+.mu-button.mu-button-flat:hover {
+    background-color: var(--md-sys-color-primary-container, rgba(0, 0, 0, 0.05)) !important;
+}
+
+.mu-button.mu-icon-button {
+    border-radius: 50% !important;
+}
+
+.mu-button:active {
+    transform: scale(0.96);
+}
+
+/* Tooltip / Toasts */
+.mu-toast {
+    border-radius: var(--md-shape-full, 9999px) !important;
+    box-shadow: var(--md-elevation-2) !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    padding: 8px 20px !important;
 }

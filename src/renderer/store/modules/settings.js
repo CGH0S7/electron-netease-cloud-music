@@ -1,3 +1,4 @@
+import Vue from 'vue';
 import * as types from '../mutation-types';
 
 const DefaultSettings = {
@@ -17,6 +18,11 @@ const DefaultSettings = {
     themePrimaryColor: '#7e57c2',
     themeSecondaryColor: '#ff4081',
     themeVariety: 'auto',
+    themeFollowCover: false,
+    customDrawerBkg: '',
+    wavyProgressBar: true,
+    playerBarGlassEffect: false,
+    showTrackMiniCover: false,
     autoReplacePlaylist: false,
     lyricTranslation: 'translation',
     titleBarShowsTrackName: true,
@@ -34,7 +40,10 @@ const state = Object.assign({}, DefaultSettings);
  */
 const mutations = {
     [types.UPDATE_SETTINGS](state, /** @type {Partial<State>} */ payload) {
-        Object.entries(payload).forEach(([key, val]) => state[key] = val);
+        if (!payload || typeof payload !== 'object') return;
+        Object.entries(payload).forEach(([key, val]) => {
+            Vue.set(state, key, val);
+        });
     }
 };
 

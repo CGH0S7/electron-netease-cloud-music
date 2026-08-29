@@ -635,6 +635,19 @@ export default {
         .action {
             margin-top: 22px;
             display: flex;
+            gap: 8px;
+            .mu-button {
+                border-radius: var(--md-shape-full, 9999px);
+                backdrop-filter: blur(12px);
+                background: rgba(255, 255, 255, 0.2);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+                transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+                &:hover {
+                    background: rgba(255, 255, 255, 0.35);
+                    transform: translateY(-2px);
+                }
+            }
         }
         &.play {
             .stylus {

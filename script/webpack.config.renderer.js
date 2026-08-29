@@ -106,7 +106,7 @@ if (isProd) {
         viewport: false,
         csp: {
             'http-equiv': 'Content-Security-Policy',
-            content: `script-src 'self'; media-src http://localhost:* https://*.vod.126.net; img-src 'self' https://*.music.126.net https://music.163.com`
+            content: `script-src 'self'; media-src http://localhost:* https://*.vod.126.net; img-src 'self' data: blob: https://*.music.126.net https://music.163.com`
         }
     };
     cfg.plugins.push(

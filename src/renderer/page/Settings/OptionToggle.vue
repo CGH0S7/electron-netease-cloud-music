@@ -4,7 +4,8 @@
         @click="parent.setByName(props.prop, !parent.settings[props.prop])">
         <mu-list-item-title>{{ props.title }}</mu-list-item-title>
         <mu-list-item-action>
-            <mu-switch :inputValue="parent.settings[props.prop]"
+            <mu-switch :input-value="Boolean(parent.settings[props.prop])"
+                readonly
                 color="secondary"></mu-switch>
         </mu-list-item-action>
     </mu-list-item>

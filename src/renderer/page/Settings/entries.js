@@ -22,6 +22,11 @@ export const Entries = [
         name: '主题',
         items: [
             {
+                type: 'toggle',
+                title: '根据专辑封面自动提取主题色',
+                prop: 'themeFollowCover'
+            },
+            {
                 type: 'color',
                 title: '主题色',
                 prop: 'themePrimaryColor'
@@ -40,6 +45,33 @@ export const Entries = [
                     { label: '亮色', value: 'light' },
                     { label: '暗色', value: 'dark' }
                 ]
+            },
+            {
+                type: 'plain',
+                title: '自定义抽屉背景图片',
+                data: 'drawerBkgStatus',
+                handler: 'uploadDrawerBkg'
+            },
+            {
+                type: 'plain',
+                title: '还原默认抽屉背景',
+                handler: 'promptResetDrawerBkg',
+                depends: ['customDrawerBkg']
+            },
+            {
+                type: 'toggle',
+                title: '播放器波浪动态进度条',
+                prop: 'wavyProgressBar'
+            },
+            {
+                type: 'toggle',
+                title: '播放底栏液态玻璃特效背景',
+                prop: 'playerBarGlassEffect'
+            },
+            {
+                type: 'toggle',
+                title: '歌曲列表显示迷你专辑封面',
+                prop: 'showTrackMiniCover'
             }
         ]
     },

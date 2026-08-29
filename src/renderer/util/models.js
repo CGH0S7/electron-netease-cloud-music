@@ -31,11 +31,12 @@ export class Track {
         if (a.al) {
             this.album = a.al;
         } else if (o.pc) {
-            this.album = { id: 0, name: o.pc.alb, pic: -1 };
+            this.album = { id: 0, name: o.pc.alb, pic: -1, picUrl: '' };
         } else {
-            const al = o.al || o.album;
+            const al = o.al || o.album || {};
             this.album = pick(al, 'id', 'name');
             this.album.pic = al.pic_str || al.picId_str || al.picId || al.pic;
+            this.album.picUrl = al.picUrl || o.picUrl || '';
         }
         // artsit
         if (a.ar) this.artists = a.ar;
