@@ -35,7 +35,7 @@
             </mu-list>
         </template>
         <PlaylistDetail v-if="playlist"
-            :playlist="playlist"></PlaylistDetail>
+            :playlist.sync="playlist"></PlaylistDetail>
     </ListDetailLayout>
 </template>
 

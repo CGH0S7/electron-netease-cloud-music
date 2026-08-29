@@ -30,6 +30,8 @@ export default class HttpClient {
     initCookieJar() {
         this.cookieJar = new CookieJar();
         this.cookieJar.setCookie('__remember_me=true');
+        this.cookieJar.setCookie('os=pc');
+        this.cookieJar.setCookie('appver=8.9.70');
     }
 
     /**
@@ -38,11 +40,15 @@ export default class HttpClient {
      */
     updateCookie(arg = {}) {
         this.initCookieJar();
-        const ignoredMobileCookie = ['os', 'osver', 'appver', 'mobilename'];
+        const ignoredMobileCookie = ['osver', 'mobilename'];
         const cookies = Object.entries(arg)
             .filter(([k]) => !ignoredMobileCookie.includes(k))
             .map(([k, v]) => `${k}=${v}`);
         this.cookieJar.setCookies(cookies);
+        if (arg.MUSIC_U && !arg.__csrf) {
+            const csrf = 'ncm_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+            this.cookieJar.setCookie(`__csrf=${csrf}`);
+        }
     }
 
     /**
@@ -148,12 +154,24 @@ export default class HttpClient {
     postW(url, data = {}) {
         url = `https://music.163.com/weapi${url}`;
         let body = Object.assign({}, data);
-        const __csrf = this.getCookie('__csrf');
+        let __csrf = this.getCookie('__csrf');
+        if (!__csrf) {
+            const musicU = this.getCookie('MUSIC_U');
+            if (musicU) {
+                __csrf = 'ncm_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+                this.cookieJar.setCookie(`__csrf=${__csrf}`);
+            }
+        }
         if (__csrf) {
-            url += `?csrf_token=${__csrf}`;
+            url += `${url.includes('?') ? '&' : '?'}csrf_token=${__csrf}`;
             body.csrf_token = __csrf;
         }
         return this.post(url, {
+            headers: {
+                'User-Agent': HttpClient.DesktopUserAgent,
+                Referer: 'https://music.163.com/',
+                Cookie: 'os=pc; appver=8.9.70;'
+            },
             body: encodeWeb(body)
         });
     }

@@ -20,7 +20,7 @@
                     @click="handleRelatedClick(list.id)"></AvatarListItem>
             </mu-list>
         </template>
-        <PlaylistDetail :playlist="playlist"></PlaylistDetail>
+        <PlaylistDetail :playlist.sync="playlist"></PlaylistDetail>
     </ListDetailLayout>
 </template>
 

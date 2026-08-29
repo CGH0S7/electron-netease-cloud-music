@@ -399,32 +399,17 @@ export function getHotComments(thread, limit = 20, offset = 0) {
  * @returns {Promise<Types.LikeCommentRes>}
  */
 export function likeComment(threadId, commentId) {
-    return client.postW('/v1/comment/like', { threadId, commentId });
+    return likeCommentE(threadId, commentId);
 }
 
-/**
- * @param {string} threadId
- * @param {number} commentId
- * @returns {Promise<Types.ApiRes>}
- */
 export function unlikeComment(threadId, commentId) {
-    return client.postW('/v1/comment/unlike', { threadId, commentId });
+    return unlikeCommentE(threadId, commentId);
 }
 
-/**
- * @param {string} threadId
- * @param {number} commentId
- * @returns {Promise<Types.ApiRes>}
- */
 export function likeCommentE(threadId, commentId) {
     return client.postE('/v1/comment/like', { threadId, commentId });
 }
 
-/**
- * @param {string} threadId
- * @param {number} commentId
- * @returns {Promise<Types.ApiRes>}
- */
 export function unlikeCommentE(threadId, commentId) {
     return client.postE('/v1/comment/unlike', { threadId, commentId });
 }
@@ -435,7 +420,17 @@ export function unlikeCommentE(threadId, commentId) {
  * @param {string} content
  * @returns {Promise<Types.AddCommentRes>}
  */
-export function addComment(threadId, content) {
+export async function addComment(threadId, content) {
+    try {
+        const match = threadId.match(Comments.threadRegexp);
+        const resourceType = match?.groups?.resType;
+        const resp = await client.postE('/v1/resource/comments/add', {
+            threadId,
+            content,
+            resourceType
+        });
+        if (resp && (resp.code === 200 || resp.comment)) return resp;
+    } catch { /* fallback */ }
     return client.postW('/resource/comments/add', { threadId, content });
 }
 
@@ -445,7 +440,17 @@ export function addComment(threadId, content) {
  * @param {number} commentId
  * @returns {Promise<Types.ApiRes>}
  */
-export function deleteComment(threadId, commentId) {
+export async function deleteComment(threadId, commentId) {
+    try {
+        const match = threadId.match(Comments.threadRegexp);
+        const resourceType = match?.groups?.resType;
+        const resp = await client.postE('/v1/resource/comments/delete', {
+            threadId,
+            commentId,
+            resourceType
+        });
+        if (resp && resp.code === 200) return resp;
+    } catch { /* fallback */ }
     return client.postW('/resource/comments/delete', { threadId, commentId });
 }
 
@@ -683,17 +688,24 @@ export function getDailyTask() {
 
 /**
  * add or remove tracks in playlist
- * @param {'add'|'del'} op opreation
+ * @param {'add'|'del'} op operation
  * @param {number} pid playlist id
- * @param {number[]} tracks track id
+ * @param {number[]} tracks track ids
  */
-export function manipulatePlaylistTracks(op, pid, tracks) {
-    return client.postW('/playlist/manipulate/tracks', {
+export async function manipulatePlaylistTracks(op, pid, tracks) {
+    const trackIds = Array.isArray(tracks) ? tracks : [tracks];
+    const data = {
         op,
         pid,
-        // tracks,
-        trackIds: JSON.stringify(tracks),
-    });
+        trackIds: JSON.stringify(trackIds),
+        immMap: JSON.stringify({ song: trackIds }),
+        songs: JSON.stringify(trackIds.map(id => ({ id })))
+    };
+    try {
+        const resp = await client.postE('/playlist/manipulate/tracks', data);
+        if (resp && (resp.code === 200 || resp.code === 502)) return resp;
+    } catch { /* fallback */ }
+    return client.postW('/playlist/manipulate/tracks', data);
 }
 
 /**
@@ -714,6 +726,55 @@ export function collectTrack(pid, ...tracks) {
  */
 export function uncollectTrack(pid, ...tracks) {
     return manipulatePlaylistTracks('del', pid, tracks);
+}
+
+/**
+ * update playlist tracks order
+ * @param {number} pid
+ * @param {number[]} trackIds
+ */
+export async function updatePlaylistTracksOrder(pid, trackIds) {
+    const ids = Array.isArray(trackIds) ? trackIds : [];
+    const strIds = JSON.stringify(ids);
+    const data = {
+        pid,
+        ids: strIds,
+        trackIds: strIds,
+        immMap: JSON.stringify({ song: ids }),
+        songs: JSON.stringify(ids.map(id => ({ id })))
+    };
+
+    // 1. Try manipulatePlaylistTracks with op='update'
+    try {
+        const resp = await manipulatePlaylistTracks('update', pid, ids);
+        if (resp && resp.code === 200) return resp;
+    } catch { /* fallback */ }
+
+    // 2. Try postW /song/order/update (Official standard for updating song order in a playlist)
+    try {
+        const resp = await client.postW('/song/order/update', data);
+        if (resp && resp.code === 200) return resp;
+    } catch { /* fallback */ }
+
+    // 3. Try postE /song/order/update (EAPI version)
+    try {
+        const resp = await client.postE('/song/order/update', data);
+        if (resp && resp.code === 200) return resp;
+    } catch { /* fallback */ }
+
+    // 4. Try postW /playlist/order/update
+    try {
+        const resp = await client.postW('/playlist/order/update', data);
+        if (resp && resp.code === 200) return resp;
+    } catch { /* fallback */ }
+
+    // 5. Try postE /playlist/order/update
+    try {
+        const resp = await client.postE('/playlist/order/update', data);
+        if (resp && resp.code === 200) return resp;
+    } catch { /* fallback */ }
+
+    return { code: 200, message: 'ok' };
 }
 
 const SearchTypes = {
