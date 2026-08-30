@@ -123,61 +123,61 @@ export async function restoreUserInfo({ state, commit, dispatch }, payload) {
     }
 }
 
-/**
- * @param {ActionContext} param0
- */
-export async function updateUserSignStatus({ commit }) {
-    commit(types.SET_USER_SIGN_PENDING, true);
-    const timestamp = Date.now();
-    const resp = await Api.getDailyTask();
-    commit(types.SET_USER_SIGN_PENDING, false);
-    if (resp.code === 200) {
-        const { pcSign, mobileSign } = resp;
-        commit(types.SET_USER_SIGN_STATUS, { timestamp, pcSign, mobileSign });
-    }
-}
+// /**
+//  * @param {ActionContext} param0
+//  */
+// export async function updateUserSignStatus({ commit }) {
+//     commit(types.SET_USER_SIGN_PENDING, true);
+//     const timestamp = Date.now();
+//     const resp = await Api.getDailyTask();
+//     commit(types.SET_USER_SIGN_PENDING, false);
+//     if (resp.code === 200) {
+//         const { pcSign, mobileSign } = resp;
+//         commit(types.SET_USER_SIGN_STATUS, { timestamp, pcSign, mobileSign });
+//     }
+// }
 
-/**
- * @param {ActionContext} param0
- */
-export async function postDailyTask({ commit }, { type }) {
-    commit(types.SET_USER_SIGN_PENDING, true);
-    let resp;
-    switch (type) {
-        case 0:
-            resp = await Api.postDailyTaskE(0);
-            if (resp.code === 200) {
-                commit(types.SET_USER_SIGN_STATUS, { mobileSign: true });
-            }
-            break;
-        case 1:
-            resp = await Api.postDailyTask(1);
-            if (resp.code === 200) {
-                commit(types.SET_USER_SIGN_STATUS, { pcSign: true });
-            }
-            break;
-    }
-    commit(types.SET_USER_SIGN_PENDING, false);
-    return resp;
-}
+// /**
+//  * @param {ActionContext} param0
+//  */
+// export async function postDailyTask({ commit }, { type }) {
+//     commit(types.SET_USER_SIGN_PENDING, true);
+//     let resp;
+//     switch (type) {
+//         case 0:
+//             resp = await Api.postDailyTaskE(0);
+//             if (resp.code === 200) {
+//                 commit(types.SET_USER_SIGN_STATUS, { mobileSign: true });
+//             }
+//             break;
+//         case 1:
+//             resp = await Api.postDailyTask(1);
+//             if (resp.code === 200) {
+//                 commit(types.SET_USER_SIGN_STATUS, { pcSign: true });
+//             }
+//             break;
+//     }
+//     commit(types.SET_USER_SIGN_PENDING, false);
+//     return resp;
+// }
 
-/**
- * @param {ActionContext} param0
- */
-export async function checkin({ state, dispatch }) {
-    let points = 0;
-    if (!state.user.signStatus.mobileSign) {
-        const resp = await dispatch('postDailyTask', { type: 0 });
-        if (resp.code === 200) points += resp.point;
-    }
-    if (!state.user.signStatus.pcSign) {
-        const resp = await dispatch('postDailyTask', { type: 1 });
-        if (resp.code === 200) points += resp.point;
-    }
-    // maybe netease have merged 2 daily task types?
-    await dispatch('updateUserSignStatus');
-    return points;
-}
+// /**
+//  * @param {ActionContext} param0
+//  */
+// export async function checkin({ state, dispatch }) {
+//     let points = 0;
+//     if (!state.user.signStatus.mobileSign) {
+//         const resp = await dispatch('postDailyTask', { type: 0 });
+//         if (resp.code === 200) points += resp.point;
+//     }
+//     if (!state.user.signStatus.pcSign) {
+//         const resp = await dispatch('postDailyTask', { type: 1 });
+//         if (resp.code === 200) points += resp.point;
+//     }
+//     // maybe netease have merged 2 daily task types?
+//     await dispatch('updateUserSignStatus');
+//     return points;
+// }
 
 /**
  * @param {ActionContext} context
@@ -228,7 +228,7 @@ export function updateFavoriteTrackIds({ state, dispatch }) {
 export function setLoginValid({ commit, dispatch }, payload) {
     if (payload === undefined || payload === true) {
         commit(types.SET_LOGIN_VALID, true);
-        dispatch('updateUserSignStatus');
+        // dispatch('updateUserSignStatus');
         dispatch('updateUserPlaylists').then(() => {
             dispatch('updateFavoriteTrackIds');
         });

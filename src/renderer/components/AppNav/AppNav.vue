@@ -99,22 +99,19 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex';
-
 import Routes from '@/routes';
 import SearchBox from './SearchBox.vue';
 import LoginDialog from './LoginDialog.vue';
 import { sizeImg, HiDpiPx } from '@/util/image';
 import { isDarwin, browserWindow } from '@/util/globals';
-import { UPDATE_SETTINGS, SET_USER_SIGN_STATUS } from '@/store/mutation-types';
 import { navigation, goBack, goForward } from '@/util/navigation';
 
-const SignIcon = {
-    [0b00]: 'radio_button_unchecked',
-    [0b01]: 'contrast',
-    [0b10]: 'contrast',
-    [0b11]: 'check_circle'
-};
+// const SignIcon = {
+//     [0b00]: 'radio_button_unchecked',
+//     [0b01]: 'contrast',
+//     [0b10]: 'contrast',
+//     [0b11]: 'check_circle'
+// };
 
 export default {
     data() {
@@ -169,32 +166,28 @@ export default {
                 };
             }
             return {};
-        },
-        /** @returns {number} */
-        signLevel() {
-            let res = 0b00;
-            if (this.user.signStatus.pcSign) res += 0b01;
-            if (this.user.signStatus.mobileSign) res += 0b10;
-            return res;
-        },
-        /** @returns {number} */
-        btnSignDisabled() {
-            return this.user.signPending || this.signLevel === 0b11;
-        },
-        /** @returns {string} */
-        btnSignText() {
-            if (this.signLevel === 0b11) return '已签到';
-            return '未签到';
-        },
-        /** @returns {string} */
-        btnSignIcon() {
-            return SignIcon[this.signLevel];
         }
+        // signLevel() {
+        //     let res = 0b00;
+        //     if (this.user.signStatus.pcSign) res += 0b01;
+        //     if (this.user.signStatus.mobileSign) res += 0b10;
+        //     return res;
+        // },
+        // btnSignDisabled() {
+        //     return this.user.signPending || this.signLevel === 0b11;
+        // },
+        // btnSignText() {
+        //     if (this.signLevel === 0b11) return '已签到';
+        //     return '未签到';
+        // },
+        // btnSignIcon() {
+        //     return SignIcon[this.signLevel];
+        // }
     },
     methods: {
-        ...mapActions([
-            'checkin'
-        ]),
+        // ...mapActions([
+        //     'checkin'
+        // ]),
         handleClose() {
             browserWindow.close();
         },
@@ -226,30 +219,28 @@ export default {
             } else {
                 this.handleSideNav({ name: 'profile' });
             }
-        },
-        async handleSign() {
-            const points = await this.checkin();
-            if (points > 0) {
-                this.$toast.message(`签到成功，获得 ${points} 点积分`);
-            } else {
-                this.$toast.message('是不是已经签到过了呢 ：）');
-            }
         }
+        // async handleSign() {
+        //     const points = await this.checkin();
+        //     if (points > 0) {
+        //         this.$toast.message(`签到成功，获得 ${points} 点积分`);
+        //     } else {
+        //         this.$toast.message('是不是已经签到过了呢 ：）');
+        //     }
+        // }
     },
     created() {
         // register autoSign handler
-        this.$store.subscribe(({ type, payload }, state) => {
-            if (// settings.autoSign enabled
-                (type === UPDATE_SETTINGS && payload && payload.autoSign === true) ||
-                // signStatus updated via `actions.updateUserSignStatus`
-                (type === SET_USER_SIGN_STATUS && payload && payload.timestamp)
-            ) {
-                const { timestamp, pcSign, mobileSign } = state.user.signStatus;
-                // autoSign not enabled || signStatus was not up-to-date || signed already
-                if (state.settings.autoSign !== true || timestamp < 0 || (pcSign && mobileSign)) return;
-                this.handleSign();
-            }
-        });
+        // this.$store.subscribe(({ type, payload }, state) => {
+        //     if (
+        //         (type === UPDATE_SETTINGS && payload && payload.autoSign === true) ||
+        //         (type === SET_USER_SIGN_STATUS && payload && payload.timestamp)
+        //     ) {
+        //         const { timestamp, pcSign, mobileSign } = state.user.signStatus;
+        //         if (state.settings.autoSign !== true || timestamp < 0 || (pcSign && mobileSign)) return;
+        //         this.handleSign();
+        //     }
+        // });
     },
     components: {
         LoginDialog,

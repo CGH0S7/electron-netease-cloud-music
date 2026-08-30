@@ -1,6 +1,6 @@
 import {
-    SET_USER_SIGN_STATUS,
-    SET_LOGIN_VALID,
+    // SET_USER_SIGN_STATUS,
+    // SET_LOGIN_VALID,
     SET_AUDIO_PAUSED,
     SET_PLAY_LIST,
     CLEAR_PLAY_LIST,
@@ -17,7 +17,7 @@ import * as RadioDb from '@/api/database/radio';
  * @type {(() => void)[]}
  */
 const unSubFns = [];
-let signStatusTimeoutId = -1;
+// let signStatusTimeoutId = -1;
 
 /**
  * @typedef {import('./modules/index').State} State
@@ -25,31 +25,31 @@ let signStatusTimeoutId = -1;
  * @typedef {import('vuex').MutationPayload} Mutation
  */
 
-/**
- * @this {Store}
- * @param {Mutation} mutation
- * @param {State} state
- */
-function autoUpdateSignStatus(mutation, state) {
-    if (mutation.type === SET_USER_SIGN_STATUS) {
-        if (signStatusTimeoutId < 0) {
-            const time = new Date(state.user.signStatus.timestamp);
-            const nextDue = new Date(state.user.signStatus.timestamp);
-            if (time.getUTCHours() >= 16) {
-                nextDue.setUTCDate(time.getUTCDate() + 1);
-            }
-            nextDue.setUTCHours(16, 0, 5, 0);
-            const timeout = nextDue.getTime() - state.user.signStatus.timestamp;
-            signStatusTimeoutId = setTimeout(() => {
-                signStatusTimeoutId = -1;
-                this.dispatch('updateUserSignStatus');
-            }, timeout);
-        }
-    } else if (mutation.type === SET_LOGIN_VALID && mutation.payload === false && signStatusTimeoutId > 0) {
-        clearTimeout(signStatusTimeoutId);
-        signStatusTimeoutId = -1;
-    }
-}
+// /**
+//  * @this {Store}
+//  * @param {Mutation} mutation
+//  * @param {State} state
+//  */
+// function autoUpdateSignStatus(mutation, state) {
+//     if (mutation.type === SET_USER_SIGN_STATUS) {
+//         if (signStatusTimeoutId < 0) {
+//             const time = new Date(state.user.signStatus.timestamp);
+//             const nextDue = new Date(state.user.signStatus.timestamp);
+//             if (time.getUTCHours() >= 16) {
+//                 nextDue.setUTCDate(time.getUTCDate() + 1);
+//             }
+//             nextDue.setUTCHours(16, 0, 5, 0);
+//             const timeout = nextDue.getTime() - state.user.signStatus.timestamp;
+//             signStatusTimeoutId = setTimeout(() => {
+//                 signStatusTimeoutId = -1;
+//                 this.dispatch('updateUserSignStatus');
+//             }, timeout);
+//         }
+//     } else if (mutation.type === SET_LOGIN_VALID && mutation.payload === false && signStatusTimeoutId > 0) {
+//         clearTimeout(signStatusTimeoutId);
+//         signStatusTimeoutId = -1;
+//     }
+// }
 
 /**
  * @this {Store}
@@ -110,10 +110,10 @@ function updateRadioTable(mutation) {
 
 export function unsubscribeAll() {
     unSubFns.forEach(unSub => unSub());
-    if (signStatusTimeoutId > 0) {
-        clearTimeout(signStatusTimeoutId);
-        signStatusTimeoutId = -1;
-    }
+    // if (signStatusTimeoutId > 0) {
+    //     clearTimeout(signStatusTimeoutId);
+    //     signStatusTimeoutId = -1;
+    // }
     unSubFns.slice(0, 0);
 }
 
@@ -122,7 +122,7 @@ export function unsubscribeAll() {
  */
 export function installHooks(store) {
     const subFns = [
-        autoUpdateSignStatus,
+        // autoUpdateSignStatus,
         moreRadioSongs,
         updatePlaylistTable,
         updateRadioTable

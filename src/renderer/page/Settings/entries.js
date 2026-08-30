@@ -204,11 +204,6 @@ export const Entries = [
             },
             {
                 type: 'toggle',
-                title: '自动签到',
-                prop: 'autoSign'
-            },
-            {
-                type: 'toggle',
                 title: '自动刷新登录状态',
                 prop: 'autoRefreshLogin'
             },
