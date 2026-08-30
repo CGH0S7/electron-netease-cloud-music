@@ -33,6 +33,7 @@ export const defaultSettings = {
     autoReplacePlaylist: false,
     lyricTranslation: 'translation',
     titleBarShowsTrackName: true,
+    prevTrackBehavior: 'smart',
     enableUnblock: false
 };
 

@@ -169,6 +169,15 @@ export const Entries = [
                 ]
             },
             {
+                type: 'select',
+                title: '点击上一首的行为',
+                prop: 'prevTrackBehavior',
+                options: [
+                    { label: '先回到当前歌曲开头（播放>3秒时），再次点击切换上一首 (Spotify 风格)', value: 'smart' },
+                    { label: '直接切换到上一首歌曲', value: 'direct' }
+                ]
+            },
+            {
                 type: 'toggle',
                 title: '启用 UnblockNeteaseMusic',
                 prop: 'enableUnblock'

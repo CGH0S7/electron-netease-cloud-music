@@ -492,7 +492,17 @@ export function playNextTrack({ dispatch }) {
 /**
  * @param {ActionContext} param0
  */
-export function playPreviousTrack({ dispatch }) {
+export function playPreviousTrack({ dispatch, state }) {
+    if (state.settings.prevTrackBehavior !== 'direct') {
+        const audio = document.querySelector('audio');
+        if (audio && audio.currentTime > 3) {
+            audio.currentTime = 0;
+            if (audio.paused) {
+                dispatch('playAudio');
+            }
+            return;
+        }
+    }
     dispatch('playTrackOffset', -1);
 }
 

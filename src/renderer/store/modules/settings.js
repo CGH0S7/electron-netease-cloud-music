@@ -26,6 +26,7 @@ const DefaultSettings = {
     autoReplacePlaylist: false,
     lyricTranslation: 'translation',
     titleBarShowsTrackName: true,
+    prevTrackBehavior: 'smart',
     enableUnblock: false
 };
 
