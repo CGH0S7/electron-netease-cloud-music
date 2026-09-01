@@ -31,6 +31,89 @@ export function getLuminance(hex) {
     return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
 }
 
+export function rgbToHsl(r, g, b) {
+    r /= 255;
+    g /= 255;
+    b /= 255;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    let h = 0;
+    let s = 0;
+    let l = (max + min) / 2;
+
+    if (max !== min) {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+            case r:
+                h = (g - b) / d + (g < b ? 6 : 0);
+                break;
+            case g:
+                h = (b - r) / d + 2;
+                break;
+            case b:
+                h = (r - g) / d + 4;
+                break;
+        }
+        h /= 6;
+    }
+    return [h * 360, s, l];
+}
+
+export function hslToRgb(h, s, l) {
+    let r, g, b;
+    if (s === 0) {
+        r = g = b = l;
+    } else {
+        const hue2rgb = (p, q, t) => {
+            let val = t;
+            if (val < 0) val += 1;
+            if (val > 1) val -= 1;
+            if (val < 1 / 6) return p + (q - p) * 6 * val;
+            if (val < 1 / 2) return q;
+            if (val < 2 / 3) return p + (q - p) * (2 / 3 - val) * 6;
+            return p;
+        };
+        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        const p = 2 * l - q;
+        const hNorm = h / 360;
+        r = hue2rgb(p, q, hNorm + 1 / 3);
+        g = hue2rgb(p, q, hNorm);
+        b = hue2rgb(p, q, hNorm - 1 / 3);
+    }
+    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+}
+
+/**
+ * Adjusts color lightness and saturation for WCAG contrast in dark vs light theme
+ * @param {string} hex
+ * @param {boolean} isDark
+ * @returns {string}
+ */
+export function adjustColorForTheme(hex, isDark) {
+    if (!hex) return hex;
+    const rgbStr = hexToRgb(hex);
+    const [r, g, b] = rgbStr.split(',').map(Number);
+    let [h, s, l] = rgbToHsl(r, g, b);
+
+    if (isDark) {
+        // In dark theme, ensure adequate brightness (tone 68~82%) and saturation for clear visibility
+        if (l < 0.65) {
+            l = Math.min(0.82, Math.max(0.68, l + 0.38));
+        }
+        s = Math.min(1.0, Math.max(0.42, s));
+    } else {
+        // In light theme, ensure adequate darkness (tone 30~44%) for clear readability on white
+        if (l > 0.46) {
+            l = Math.max(0.28, Math.min(0.42, l - 0.22));
+        }
+        s = Math.min(1.0, Math.max(0.48, s));
+    }
+    const [adjR, adjG, adjB] = hslToRgb(h, s, l);
+    const toHex = rgb => '#' + rgb.map(x => Math.min(255, Math.max(0, Math.round(x))).toString(16).padStart(2, '0')).join('');
+    return toHex([adjR, adjG, adjB]);
+}
+
 /**
  * add app specific theme variable, then set theme color
  * @param {any} theme theme option
@@ -58,6 +141,7 @@ export function initTheme(theme, extendName) {
 --disabled-text-color: ${theme.text.disabled};
 --background-color: ${theme.background.default};
 --paper-color: ${theme.background.paper};
+--is-dark-theme: ${isDark ? '1' : '0'};
 
 /* Adaptive Top Bar Foreground Tokens */
 --on-primary-color: ${onPrimary};
@@ -120,8 +204,11 @@ export function initTheme(theme, extendName) {
  * @param {string} extendName theme name to extend
  */
 export function setTheme(theme, extendName) {
+    const isDark = extendName === 'dark';
+    const primary = adjustColorForTheme(theme.primary, isDark);
+    const secondary = adjustColorForTheme(theme.secondary, isDark);
     const id = 'ncm';
-    MuseUI.theme.add(id, { ...overrides, ...theme }, extendName).use(id);
+    MuseUI.theme.add(id, { ...overrides, ...theme, primary, secondary }, extendName).use(id);
 }
 
 /**
@@ -226,12 +313,13 @@ export async function extractColorsFromImage(src) {
  * @param {MediaQueryList} darkMediaQuery
  */
 export async function applyThemeFromSettings(settings, ui, darkMediaQuery) {
+    const variety = settings.themeVariety === 'auto'
+        ? (darkMediaQuery && darkMediaQuery.matches ? 'dark' : 'light')
+        : settings.themeVariety;
+
     if (settings.themeFollowCover && ui && ui.coverImgSrc) {
         const extracted = await extractColorsFromImage(ui.coverImgSrc);
         if (extracted) {
-            const variety = settings.themeVariety === 'auto'
-                ? (extracted.isDark ? 'dark' : 'light')
-                : settings.themeVariety;
             setTheme({
                 primary: extracted.primary,
                 secondary: extracted.secondary
@@ -240,9 +328,6 @@ export async function applyThemeFromSettings(settings, ui, darkMediaQuery) {
         }
     }
 
-    const variety = settings.themeVariety === 'auto'
-        ? (darkMediaQuery && darkMediaQuery.matches ? 'dark' : 'light')
-        : settings.themeVariety;
     setTheme({
         primary: settings.themePrimaryColor,
         secondary: settings.themeSecondaryColor

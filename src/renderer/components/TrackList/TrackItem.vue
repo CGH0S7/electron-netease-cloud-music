@@ -236,9 +236,13 @@ export default {
 
     &.track--active {
         background-color: var(--md-sys-color-primary-container, rgba(229, 57, 53, 0.12));
+        border-radius: var(--md-shape-xs, 6px);
         .name {
-            color: var(--primary-color);
+            color: var(--primary-color) !important;
             font-weight: 600;
+        }
+        .playing-icon {
+            color: var(--primary-color) !important;
         }
     }
 }

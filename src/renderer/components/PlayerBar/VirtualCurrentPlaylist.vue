@@ -56,7 +56,7 @@
                                     :size="18"></mu-icon>
                                 <span v-else>{{(indexMap.has(index) ? indexMap.get(index) : index) + 1}}</span>
                             </div>
-                            <div class="mu-item-title">
+                            <div class="mu-item-title" :class="{ 'is-playing': item.id == playing.id }">
                                 {{item.name}}
                                 <span class="track-artist mu-item-after-text"> - {{item.artistName}}</span>
                             </div>
@@ -333,6 +333,10 @@ export default {
             }
             .track-artist {
                 font-size: 11px;
+            }
+            .mu-item-title.is-playing {
+                color: var(--primary-color) !important;
+                font-weight: 600;
             }
             .current-list-after {
                 opacity: 0;

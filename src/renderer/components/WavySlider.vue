@@ -163,9 +163,12 @@ export default {
             // Extract primary & outline colors from computed styles or fallback
             const style = getComputedStyle(this.$el || document.body);
             const primaryColor = style.getPropertyValue('--primary-color').trim() || '#e53935';
-            const isDark = document.body.classList.contains('dark') || style.getPropertyValue('--background-color').includes('30, 30');
+            const isDark = style.getPropertyValue('--is-dark-theme').trim() === '1'
+                || document.body.classList.contains('dark')
+                || style.getPropertyValue('--background-color').includes('30, 30')
+                || style.getPropertyValue('--background-color').includes('20, 18');
 
-            const inactiveTrackColor = isDark ? 'rgba(255, 255, 255, 0.22)' : 'rgba(0, 0, 0, 0.16)';
+            const inactiveTrackColor = isDark ? 'rgba(255, 255, 255, 0.28)' : 'rgba(0, 0, 0, 0.16)';
 
             // 1. Draw Unplayed Track (Right of Thumb)
             if (thumbX < w) {
