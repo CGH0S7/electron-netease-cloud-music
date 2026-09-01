@@ -140,15 +140,22 @@ export default {
 }
 
 .router-view {
-    height: calc(100vh - 140px);
+    height: calc(100vh - 136px);
     position: relative;
     margin-top: 64px;
+    overflow: hidden;
     .ncm-page {
         background-color: var(--background-color);
         width: 100%;
         height: 100%;
         overflow: auto;
         position: absolute;
+        top: 0;
+        left: 0;
+
+        &.player {
+            overflow: hidden !important;
+        }
     }
 }
 </style>

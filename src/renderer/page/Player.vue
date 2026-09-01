@@ -399,7 +399,7 @@ export default {
                 return createImageBitmap(b);
             }).then(bm => {
                 ctx.clearRect(0, 0, w, h);
-                ctx.drawImage(bm, 0, 0, size, size, -30, -30, w + 60, h + 60);
+                ctx.drawImage(bm, 0, 0, size, size, -120, -120, w + 240, h + 240);
             });
         },
         /** 
@@ -591,19 +591,21 @@ export default {
     height: 100%;
     width: 100%;
     box-sizing: border-box;
-    overflow: hidden;
+    overflow: hidden !important;
     padding: 0 clamp(16px, 2.5vw, 40px);
 
     .bkg {
         position: absolute;
         top: 0;
         left: 0;
-        right: 0;
-        bottom: 0;
+        width: 100%;
+        height: 100%;
         overflow: hidden;
+        pointer-events: none;
         canvas {
             width: 100%;
             height: 100%;
+            display: block;
         }
     }
     .phonograph,
@@ -761,11 +763,11 @@ export default {
             }
         }
         .lyric {
-            flex-grow: 1;
+            flex: 1 1 auto;
             position: relative;
             overflow: hidden;
-            height: calc(100% - 110px);
-            min-height: 240px;
+            min-height: 0;
+            height: 0;
 
             .control {
                 position: absolute;
