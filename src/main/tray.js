@@ -107,7 +107,7 @@ export class AppTray {
             restore();
         }
         this.tray.on('click', () => this.raise() );
-        this.tray.setToolTip('Electron NCM');
+        this.tray.setToolTip('MaterialNCM');
         /**
          * @type {import('electron').MenuItemConstructorOptions[]}
          */

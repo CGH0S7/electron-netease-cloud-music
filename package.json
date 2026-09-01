@@ -1,6 +1,6 @@
 {
   "name": "electron-netease-cloud-music",
-  "version": "0.9.40",
+  "version": "1.0.0",
   "description": "UNOFFICIAL client for music.163.com",
   "main": "main.js",
   "scripts": {
@@ -11,7 +11,7 @@
   },
   "author": "rocka <i@rocka.me> (https://rocka.me)",
   "license": "GPL-3.0",
-  "repository": "github:rocket1184/electron-netease-cloud-music",
+  "repository": "github:CGH0S7/electron-netease-cloud-music",
   "devDependencies": {
     "@babel/core": "^7.26.10",
     "@babel/eslint-parser": "^7.26.10",

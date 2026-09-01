@@ -28,7 +28,7 @@
             </div>
             <div id="appbar-drag-region"></div>
         </template>
-        <mu-appbar title="Electron Netease Cloud Music"
+        <mu-appbar title="MaterialNCM"
             color="primary">
             <template #left>
                 <div class="nav-control-group">

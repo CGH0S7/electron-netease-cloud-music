@@ -3,6 +3,6 @@ const pkgJson = require('../package.json');
 module.exports = {
     name: pkgJson.name,
     version: pkgJson.version,
-    productName: 'Electron NCM',
+    productName: 'MaterialNCM',
     devPort: 24353
 };

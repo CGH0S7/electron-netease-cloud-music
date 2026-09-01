@@ -1,9 +1,9 @@
-# Electron Netease Cloud Music
+# MaterialNCM
 
 **UNOFFICIAL** client for music.163.com . Powered by [Electron](https://electronjs.org), [Vue](https://vuejs.org), and [Muse-UI](https://muse-ui.org).
 
-[![Build status](https://github.com/Rocket1184/electron-netease-cloud-music/actions/workflows/build.yml/badge.svg)](https://github.com/Rocket1184/electron-netease-cloud-music/actions/workflows/build.yml)
-[![release (latest SemVer)](https://img.shields.io/github/v/release/Rocket1184/electron-netease-cloud-music)](https://github.com/Rocket1184/electron-netease-cloud-music/releases/latest)
+[![Build status](https://github.com/CGH0S7/electron-netease-cloud-music/actions/workflows/build.yml/badge.svg)](https://github.com/CGH0S7/electron-netease-cloud-music/actions/workflows/build.yml)
+[![release (latest SemVer)](https://img.shields.io/github/v/release/CGH0S7/electron-netease-cloud-music)](https://github.com/CGH0S7/electron-netease-cloud-music/releases/latest)
 
 ## ScreenShots
 

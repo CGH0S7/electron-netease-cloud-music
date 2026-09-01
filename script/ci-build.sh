@@ -9,7 +9,7 @@
 BUILD_MODE="${1:-push}"
 
 # variables
-APP_NAME="Electron NCM"
+APP_NAME="MaterialNCM"
 PKG_NAME="electron-netease-cloud-music"
 ARTIFACT_NAME="electron-ncm"
 PLATFORMS=(linux darwin)

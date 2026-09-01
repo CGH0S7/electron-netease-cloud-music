@@ -4,7 +4,7 @@ import { app } from 'electron';
 
 const fsp = fs.promises;
 
-export const productName = 'Electron NCM';
+export const productName = 'MaterialNCM';
 const configDir = app.getPath('userData');
 const configPath = path.join(configDir, 'settings.json');
 

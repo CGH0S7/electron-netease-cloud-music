@@ -404,9 +404,9 @@ export function updateMainWindowTitle({ getters }, payload = true) {
     let title;
     const track = getters.playing;
     if (payload && track && track.id) {
-        title = `${track.name} | Electron NCM`;
+        title = `${track.name} | MaterialNCM`;
     } else {
-        title = 'Electron NCM';
+        title = 'MaterialNCM';
     }
     browserWindow.setTitle(title);
 }

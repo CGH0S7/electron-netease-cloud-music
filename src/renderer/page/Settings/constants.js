@@ -7,6 +7,6 @@ Chrome: ${versions.chrome}
 Node: ${versions.node}
 V8: ${versions.v8}`;
 
-export const RepoURL = 'https://github.com/Rocket1184/electron-netease-cloud-music';
+export const RepoURL = 'https://github.com/CGH0S7/electron-netease-cloud-music';
 
 export const IpcTag = 'Settings';
