@@ -20,8 +20,7 @@ let cfg = {
     module: {
         rules: [
             {
-                resource: path => path.includes('src/main/mpris/mpris.js')
-                    || path.includes('src/main/status-notifier.js'),
+                resource: path => path.includes('src/main/mpris/mpris.js'),
                 use: {
                     loader: 'babel-loader',
                     options: {

@@ -3,8 +3,6 @@ import { Tray, Menu, ipcMain, app } from 'electron';
 
 import debug from 'debug';
 
-import { StatusNotifier } from './status-notifier';
-
 const TAG = 'Tray';
 const d = debug(TAG);
 
@@ -110,16 +108,6 @@ export class AppTray {
         }
         this.tray.on('click', () => this.raise() );
         this.tray.setToolTip('Electron NCM');
-        this.statusNotifier = null;
-        if (process.platform === 'linux'
-            && Boolean(process.env.WAYLAND_DISPLAY)
-            && [process.env.XDG_CURRENT_DESKTOP, process.env.XDG_SESSION_DESKTOP]
-                .some(env => (env || '').endsWith('KDE'))) {
-            this.statusNotifier = new StatusNotifier(
-                iconPath,
-                (x, y) => this.popupContextMenu(x, y)
-            );
-        }
         /**
          * @type {import('electron').MenuItemConstructorOptions[]}
          */
@@ -218,7 +206,6 @@ export class AppTray {
         if (color === 'light' || color === 'dark') {
             const iconPath = requireIcon(`tray.${color}`);
             this.tray.setImage(iconPath);
-            if (this.statusNotifier) this.statusNotifier.setIcon(iconPath);
         }
     }
 
@@ -255,12 +242,6 @@ export class AppTray {
         const menu = Menu.buildFromTemplate(tmpl);
         this.contextMenu = menu;
         this.tray.setContextMenu(menu);
-        if (this.statusNotifier) this.statusNotifier.setMenu(tmpl);
-    }
-
-    popupContextMenu(x, y) {
-        if (!this.contextMenu || !this.win || this.win.isDestroyed()) return;
-        this.contextMenu.popup({ window: this.win, x, y });
     }
 
     /**
@@ -275,10 +256,6 @@ export class AppTray {
     destroy() {
         this.tray.destroy();
         this.tray = null;
-        if (this.statusNotifier) {
-            this.statusNotifier.destroy();
-            this.statusNotifier = null;
-        }
         ipcMain.removeListener(TAG, this.ipcListener);
     }
 }
