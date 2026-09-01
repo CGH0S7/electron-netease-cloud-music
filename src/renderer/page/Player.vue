@@ -9,18 +9,12 @@
         <div class="phonograph"
             :class="{ play: !ui.paused }">
             <img :src="needleImg"
-                class="stylus"
-                width="100"
-                height="142.5">
+                class="stylus">
             <div class="vinyl">
                 <img :src="albumImgSrc"
-                    class="cover"
-                    width="220"
-                    height="220">
+                    class="cover">
                 <img :src="discImg"
-                    class="border"
-                    width="350"
-                    height="350">
+                    class="border">
             </div>
             <div v-if="playing.id"
                 class="action">
@@ -176,6 +170,7 @@
                     <p>歌词加载中 ...</p>
                 </div>
                 <div v-show="!ui.lyricLoading"
+                    ref="scrollerWrapper"
                     class="scroller-wrapper"
                     @mousewheel="handleMouseScroll"
                     @mouseenter="lyricMouseIn = true"
@@ -189,6 +184,7 @@
                                 :key="index"
                                 :class="{ active: index == currentLyricIndex }"
                                 :data-time="line.timestamp"
+                                @click="handleLyricClick(line.timestamp)"
                                 v-text="line.content + '\n' + (line.trans || '')"></div>
                         </template>
                         <template v-else-if="ui.lyric.txtLyric">
@@ -288,7 +284,7 @@ export default {
         /** @returns {string} */
         albumImgSrc() {
             if (this.ui.coverImgSrc) {
-                return sizeImg(this.ui.coverImgSrc, HiDpiPx(220));
+                return sizeImg(this.ui.coverImgSrc, HiDpiPx(400));
             }
             return discDefault;
         },
@@ -327,12 +323,19 @@ export default {
                 // non-scrollable lyric
                 return 'height: 100%; overflow: auto;';
             }
+            const wrapper = this.$refs.scrollerWrapper;
+            const containerHeight = wrapper ? wrapper.clientHeight : 380;
+            const targetCenter = containerHeight * 0.38;
+
             if (this.currentLyricIndex === -1 || !this.$refs.lyric || this.$refs.lyric.length === 0) {
                 // initial state
-                return `transform: translateY(${129 + this.lyricScrollOffset}px)`;
+                return `transform: translateY(${targetCenter + this.lyricScrollOffset}px)`;
             }
             const currentLyricElem = this.$refs.lyric[this.currentLyricIndex];
-            const offset = 150 - currentLyricElem.offsetTop - currentLyricElem.clientHeight + this.lyricScrollOffset;
+            if (!currentLyricElem) {
+                return `transform: translateY(${targetCenter + this.lyricScrollOffset}px)`;
+            }
+            const offset = targetCenter - currentLyricElem.offsetTop - (currentLyricElem.clientHeight / 2) + this.lyricScrollOffset;
             return `transform: translateY(${offset}px);`;
         }
     },
@@ -342,6 +345,13 @@ export default {
             'toggleCollectPopup',
             'downloadTrack',
         ]),
+        handleLyricClick(timestamp) {
+            if (timestamp === undefined || timestamp === null) return;
+            const audio = document.getElementById('playerbar-audio');
+            if (audio) {
+                audio.currentTime = timestamp;
+            }
+        },
         listenAudioUpdate() {
             /** @type {HTMLAudioElement} */
             const audio = document.getElementById('playerbar-audio');
@@ -573,9 +583,17 @@ export default {
 }
 
 .player {
+    --vinyl-size: clamp(280px, min(36vw, 46vh), 460px);
     color: black;
     display: flex;
     flex-direction: row;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    padding: 0 clamp(16px, 2.5vw, 40px);
+
     .bkg {
         position: absolute;
         top: 0;
@@ -591,13 +609,17 @@ export default {
     .phonograph,
     .info {
         z-index: 1;
-        flex-grow: 1;
-        flex-basis: 0;
+        position: relative;
     }
     .phonograph {
         display: flex;
         flex-direction: column;
         align-items: center;
+        justify-content: center;
+        height: 100%;
+        flex: 1 1 45%;
+        min-width: 0;
+
         .stylus,
         .vinyl {
             pointer-events: none;
@@ -605,42 +627,53 @@ export default {
         }
         .stylus {
             z-index: 2;
-            margin: -6px 0 -74px 74px;
-            transition: transform 0.5s;
-            transform-origin: 15px 0;
+            width: calc(var(--vinyl-size) * 0.285);
+            height: calc(var(--vinyl-size) * 0.407);
+            margin: calc(var(--vinyl-size) * -0.02) 0 calc(var(--vinyl-size) * -0.21) calc(var(--vinyl-size) * 0.21);
+            transition: transform 0.5s cubic-bezier(0.2, 0, 0, 1);
+            transform-origin: 15% 0;
             transform: rotate(-25deg);
+            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.35));
         }
         .vinyl {
             position: relative;
-            width: 350px;
-            height: 350px;
+            width: var(--vinyl-size);
+            height: var(--vinyl-size);
             animation: disk-playing 25s linear infinite;
             animation-play-state: paused;
+            border-radius: 50%;
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+
             .cover {
                 position: absolute;
                 display: block;
-                width: 220px;
-                height: 220px;
-                margin: 65px;
+                width: 63%;
+                height: 63%;
+                top: 18.5%;
+                left: 18.5%;
+                border-radius: 50%;
+                object-fit: cover;
             }
             .border {
                 position: absolute;
                 display: block;
-                width: 350px;
-                height: 350px;
+                width: 100%;
+                height: 100%;
                 top: 0;
                 left: 0;
             }
         }
         .action {
-            margin-top: 22px;
+            margin-top: clamp(16px, 2.5vh, 28px);
             display: flex;
-            gap: 8px;
+            gap: clamp(6px, 1vw, 12px);
+            flex-wrap: wrap;
+            justify-content: center;
             .mu-button {
                 border-radius: var(--md-shape-full, 9999px);
                 backdrop-filter: blur(12px);
                 background: rgba(255, 255, 255, 0.2);
-                border: 1px solid rgba(255, 255, 255, 0.2);
+                border: 1px solid rgba(255, 255, 255, 0.25);
                 box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
                 transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
                 &:hover {
@@ -659,26 +692,43 @@ export default {
         }
     }
     .info {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        flex: 1 1 55%;
+        min-width: 0;
+        padding-left: clamp(16px, 3vw, 40px);
+        padding-right: clamp(16px, 3vw, 48px);
+        padding-top: clamp(16px, 2.5vh, 32px);
+        padding-bottom: clamp(16px, 2.5vh, 32px);
+        box-sizing: border-box;
+
         .title,
         .source,
         .scroller-wrapper {
-            // lyric needs padding, or its text-shadow would be cut off
             padding-left: 6px;
         }
         .title {
-            margin-top: 16px;
+            margin-top: 0;
             display: flex;
             align-items: center;
+            flex-shrink: 0;
             .name {
                 .ellipsis-text(calc(~'50vw - 48px'));
-                font-size: 26px;
+                font-size: clamp(24px, 2.4vw, 34px);
+                font-weight: 700;
+                line-height: 1.25;
+                letter-spacing: -0.01em;
             }
             .btn-mv {
-                margin-left: 4px;
+                margin-left: 8px;
             }
         }
         .source {
-            margin: 16px 0 24px;
+            margin: clamp(10px, 1.5vh, 18px) 0 clamp(14px, 2vh, 24px);
+            flex-shrink: 0;
+            font-size: clamp(13px, 1.1vw, 15px);
+            opacity: 0.88;
             .source-artist {
                 margin-inline-end: 16px;
             }
@@ -698,50 +748,82 @@ export default {
             }
         }
         .description {
-            height: 340px;
+            flex-grow: 1;
             position: relative;
             margin: 0 40px 0 6px;
+            overflow: hidden;
             .scroller {
                 height: 100%;
                 overflow-y: auto;
                 white-space: pre-wrap;
+                font-size: clamp(14px, 1.2vw, 17px);
+                line-height: 1.8;
             }
         }
         .lyric {
-            height: 340px;
+            flex-grow: 1;
             position: relative;
+            overflow: hidden;
+            height: calc(100% - 110px);
+            min-height: 240px;
+
             .control {
                 position: absolute;
-                bottom: 0;
+                bottom: 8px;
+                right: 16px;
                 z-index: 0;
                 opacity: 0;
-                transition: 0.5s opacity;
+                transition: 0.4s opacity;
             }
             .mask {
                 height: 100%;
                 display: flex;
                 align-items: center;
+                font-size: clamp(16px, 1.4vw, 20px);
             }
             .scroller-wrapper {
                 height: 100%;
                 overflow: hidden;
-                // transition: 0.5s mask-image;
+                mask-image: linear-gradient(to bottom, transparent 0%, #000 12%, #000 88%, transparent 100%);
+                -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 12%, #000 88%, transparent 100%);
+
                 .scroller {
-                    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+                    transition: transform 0.45s cubic-bezier(0.2, 0, 0, 1);
                     .line {
-                        margin: 14px 0;
+                        margin: clamp(16px, 2.2vh, 28px) 0;
+                        font-size: clamp(16px, 1.4vw, 21px);
+                        line-height: 1.6;
                         white-space: pre-wrap;
+                        color: inherit;
+                        opacity: 0.52;
+                        transform: scale(0.96);
+                        transform-origin: left center;
+                        transition: all 0.35s cubic-bezier(0.2, 0, 0, 1);
+                        cursor: pointer;
+
+                        &:hover {
+                            opacity: 0.88;
+                            transform: scale(0.99);
+                        }
                     }
-                    .active {
-                        color: white;
-                        text-shadow: 0 0 4px black, 0 2px 4px rgba(0, 0, 0, 0.7);
+                    .line.active {
+                        font-size: clamp(22px, 2.1vw, 30px);
+                        font-weight: 700;
+                        opacity: 1;
+                        transform: scale(1.05);
+                        color: #ffffff;
+                        text-shadow: 0 0 16px rgba(0, 0, 0, 0.45), 0 2px 10px rgba(0, 0, 0, 0.7);
                     }
                     .txt {
                         margin-bottom: 84px;
                         white-space: pre-wrap;
+                        font-size: clamp(15px, 1.3vw, 18px);
+                        line-height: 1.8;
                     }
                     .contributors {
                         margin-top: 56px;
+                        font-size: clamp(12px, 1vw, 14px);
+                        opacity: 0.75;
                     }
                     .contributor {
                         color: inherit;
@@ -753,9 +835,9 @@ export default {
             }
             &:hover {
                 .scroller-wrapper {
-                    mask-image: linear-gradient(to top, transparent 32px, #000 82px),
+                    mask-image: linear-gradient(to bottom, transparent 0%, #000 12%, #000 88%, transparent 100%),
                         linear-gradient(to left, #000 10px, transparent 10px, transparent);
-                    -webkit-mask-image: linear-gradient(to top, transparent 32px, #000 82px),
+                    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 12%, #000 88%, transparent 100%),
                         linear-gradient(to left, #000 10px, transparent 10px, transparent);
                 }
                 .control {
@@ -779,7 +861,7 @@ export default {
         }
         .lyric,
         .description {
-            color: rgba(255, 255, 255, 0.6);
+            color: rgba(255, 255, 255, 0.75);
         }
     }
 }
